@@ -3,6 +3,7 @@ package ru.mixaron.spring.taskmanager.service;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.mixaron.spring.taskmanager.models.Person;
+import ru.mixaron.spring.taskmanager.models.Tasks;
 import ru.mixaron.spring.taskmanager.repository.PersonRepo;
 
 import java.util.Optional;
@@ -28,4 +29,5 @@ public class PersonService {
     public Optional<Person> SearchByName(String name) {
         return personRepo.findByName(name);
     }
+
 }

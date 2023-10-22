@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="https://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Задача</title>
+</head>
+<body>
+<h2 th:text="${task1.task}"></h2>
+<br>
+<p th:text="${task1.text}"></p>
+<p th:text="'Дата создания ' + ${task1.dateOfCreation}"></p>
+<p th:text="'Дата Изменения ' + ${task1.dateOfChange}"></p>
+<p th:text="${task1.isCompleted}">Выполнено</p>
+<h2>Изменить данные</h2>
+<form method="post" th:action="@{'/task/' + ${id} + '/edit'}" th:object="${task1}">
+    <label for="task">Введите имя задачи</label>
+    <input type="text" id="task" th:field="*{task}">
+    <p th:if="${#fields.hasErrors('task')}" th:errors="*{task}" style="color: red">Имя задачи</p>
+    <br>
+    <label for="text">Введите Текст</label>
+    <input type="text" id="text" th:field="*{text}">
+    <p th:if="${#fields.hasErrors('text')}" th:errors="${task1.text}" style="color: red">Имя задачи</p>
+    <br>
+    <select th:if="${task1.isCompleted != 'Выполнил'}" name="Стадия" id="isCompleted" th:field="*{isCompleted}">
+            <option value="Не приступил">Не приступил</option>
+            <option value="Приступил">Приступил</option>
+            <option value="Выполнил">Выполнил</option>
+        </select>
+    <p th:if="${task1.isCompleted == 'Выполнил'}" style="color: green">Выполнил</p>
+    <input type="submit" value="Успешно">
+</form>
+<form th:method="POST" th:action="@{'/task/' + ${id}}">
+    <input type="hidden" name="_method" value="DELETE">
+    <input style="color: red" type="submit" value="Удалить">
+</form>
+</body>
+</html>

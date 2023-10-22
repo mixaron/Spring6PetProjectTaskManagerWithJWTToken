@@ -8,7 +8,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-import ru.mixaron.spring.taskmanager.service.PersonDetailService;
+import ru.mixaron.spring.taskmanager.service.PersonDetailServices;
 
 import java.util.Collections;
 
@@ -17,13 +17,14 @@ public class Auth implements AuthenticationProvider {
 
     private final PasswordEncoder passwordEncoder;
 
-    private final PersonDetailService personDetailService;
+    private final PersonDetailServices personDetailService;
 
-    public Auth(PasswordEncoder passwordEncoder, PersonDetailService personDetailService) {
+    public Auth(PasswordEncoder passwordEncoder, PersonDetailServices personDetailService) {
         this.passwordEncoder = passwordEncoder;
         this.personDetailService = personDetailService;
     }
 
+    // это чтобы сравнить зашифрованный пароль
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         String username = authentication.getName();

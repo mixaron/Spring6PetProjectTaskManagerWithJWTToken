@@ -7,17 +7,20 @@
 </head>
 <body>
 <div class="registration-cssave">
-    <form th:method="POST" th:action="@{/task/registration}" th:object="${person}">
-        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+    <form th:method="POST" th:action="@{/registration}" th:object="${person}">
+<!--        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">-->
         <h3 class="text-center">Форма Регистрации</h3>
         <div class="form-group">
-            <input class="form-control item" type="text" th:field="*{name}" name="username" pattern="^[a-zA-Z0-9_.-]*$" id="username" placeholder="Логин" required>
+            <input class="form-control item" type="text" th:field="*{name}" name="name" id="username" placeholder="Логин" required>
+        </div>
+        <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></p>
+        <div class="form-group">
+            <input class="form-control item" type="text" th:field="*{password}" name="password" id="password" placeholder="Пароль" required>
+            <p th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></p>
+
         </div>
         <div class="form-group">
-            <input class="form-control item" type="text" th:field="*{password}" name="Пароль" id="password" placeholder="Пароль" required>
-        </div>
-        <div class="form-group">
-            <button class="btn btn-primary btn-block create-account" type="submit">Регистрация аккаунта</button>
+        <button class="btn btn-primary btn-block create-account" type="submit">Регистрация аккаунта</button>
         </div>
     </form>
 </div>
