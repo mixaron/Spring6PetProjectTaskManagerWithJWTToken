@@ -1,12 +1,13 @@
 package ru.mixaron.spring.taskmanager.service;
 
 
-import org.springframework.scheduling.config.Task;
 import org.springframework.transaction.annotation.Transactional;
 import ru.mixaron.spring.taskmanager.models.Tasks;
 import org.springframework.stereotype.Service;
 import ru.mixaron.spring.taskmanager.models.Person;
 import ru.mixaron.spring.taskmanager.repository.TasksRepo;
+import ru.mixaron.spring.taskmanager.util.Errors.SortErrorResponse;
+import ru.mixaron.spring.taskmanager.util.Errors.TasksNotFoundException;
 
 import java.util.Date;
 import java.util.List;
@@ -40,7 +41,7 @@ public class TasksService {
     }
 
     public Tasks watchTask(UUID id) {
-        return tasksRepo.findById(id);
+        return tasksRepo.findById(id).orElseThrow(TasksNotFoundException::new);
     }
 
     public List<Tasks> findAllSort(String sort, Person person) {
@@ -56,7 +57,7 @@ public class TasksService {
         if (sort.equals("name")) {
             return tasksRepo.findAllByPersonOrderByTask(person);
         }
-        return null;
+        throw new SortErrorResponse();
     }
 
     public void delete(UUID id) {

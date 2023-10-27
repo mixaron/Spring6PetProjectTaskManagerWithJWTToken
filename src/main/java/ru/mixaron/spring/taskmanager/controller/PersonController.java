@@ -1,18 +1,14 @@
 package ru.mixaron.spring.taskmanager.controller;
 
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.config.Task;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import ru.mixaron.spring.taskmanager.dto.TasksDTO;
 import ru.mixaron.spring.taskmanager.models.Person;
 import ru.mixaron.spring.taskmanager.models.Tasks;
@@ -20,15 +16,17 @@ import ru.mixaron.spring.taskmanager.security.CurrentUser;
 import ru.mixaron.spring.taskmanager.service.PersonService;
 import ru.mixaron.spring.taskmanager.service.TasksService;
 import ru.mixaron.spring.taskmanager.util.Converter;
+import ru.mixaron.spring.taskmanager.util.Errors.SortErrorResponse;
+import ru.mixaron.spring.taskmanager.util.Errors.TasksNotFoundException;
+import ru.mixaron.spring.taskmanager.util.Errors.TasksErrorResponse;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/task")
 @AllArgsConstructor
+@ControllerAdvice
 public class PersonController {
 
 
@@ -70,7 +68,7 @@ public class PersonController {
     @PostMapping("/add")
     public ResponseEntity<String> addPost(@RequestBody @Valid TasksDTO task1, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            return ResponseEntity.ok("Not Created");
+            return new ResponseEntity<>("Something bad", HttpStatus.BAD_REQUEST);
         }
         Tasks task =  converter.toTasks(task1);
 
@@ -83,6 +81,19 @@ public class PersonController {
     @GetMapping("/{id}")
     public ResponseEntity<String> watchTask(@PathVariable("id") UUID id) {
         return ResponseEntity.ok("Получилось\n" + tasksService.returnOne(tasksService.watchTask(id)));
+    }
+
+    @ExceptionHandler
+    private ResponseEntity<TasksErrorResponse> handlerException(TasksNotFoundException e) {
+        TasksErrorResponse response = new TasksErrorResponse(
+                "Task with this id not found", System.currentTimeMillis()
+        );
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<TasksErrorResponse> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        TasksErrorResponse response = new TasksErrorResponse("Invalid UUID format", System.currentTimeMillis());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 //    @PostMapping("/{id}/edit")
 //    public ResponseEntity<Tasks> edit(@PathVariable("id") int id, @RequestBody @Valid Tasks tasks, BindingResult bindingResult, HttpSession httpSession) {
@@ -99,12 +110,17 @@ public class PersonController {
 
     @GetMapping("/sort/{name}")
     public ResponseEntity<String> sort(@PathVariable("name") String sortValue) {
-        if (currentUser.isPerson().isPresent()) {
             Person person1 = currentUser.isPerson().get();
             List<Tasks> tasks = tasksService.findAllSort(sortValue, person1);
             return ResponseEntity.ok(tasksService.returnALl(tasks));
-        }
-        return ResponseEntity.ok("Not ok");
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<TasksErrorResponse> sortException(SortErrorResponse e) {
+        TasksErrorResponse response = new TasksErrorResponse(
+                "invalid request ",
+                System.currentTimeMillis());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     @DeleteMapping("/{id}")
