@@ -2,14 +2,18 @@ package ru.mixaron.spring.taskmanager.controller;
 
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.config.Task;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import ru.mixaron.spring.taskmanager.dto.PersonDTO;
+
+import ru.mixaron.spring.taskmanager.dto.TasksDTO;
 import ru.mixaron.spring.taskmanager.models.Person;
 import ru.mixaron.spring.taskmanager.models.Tasks;
 import ru.mixaron.spring.taskmanager.security.CurrentUser;
@@ -22,85 +26,90 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@Controller
+@RestController
 @RequestMapping("/task")
+@AllArgsConstructor
 public class PersonController {
 
 
     private final PersonService personService;
 
-    private final CurrentUser currentUser;
+
 
     private final TasksService tasksService;
 
     private final Converter converter;
 
-    public PersonController(PersonService personService, CurrentUser currentUser, TasksService tasksService, Converter converter) {
-        this.personService = personService;
-        this.currentUser = currentUser;
-        this.tasksService = tasksService;
-        this.converter = converter;
-    }
+    private final CurrentUser currentUser;
+
+
 
     @GetMapping
-    public String task(Model model, HttpSession httpSession) {
+    public ResponseEntity<String> task() {
         if (currentUser.isPerson().isPresent()) {
             Person person1 = currentUser.isPerson().get();
-//            List<PersonDTO> personDTOS = converter.toPersonDTO(tasksService.findByPerson(person1));
-            model.addAttribute("tasks", tasksService.findByPerson(person1));
-            httpSession.setAttribute("person", person1);
+            List<Tasks> person = tasksService.findByPerson(person1);
+            return ResponseEntity.ok(tasksService.returnALl(person));
+
         }
-        return "task";
+        return ResponseEntity.ok(null);
     }
 
-    @GetMapping("/add")
-    public String add(@ModelAttribute("task1") Tasks task) {
-        return "add";
-    }
+//    @GetMapping
+//    public List<Tasks> getAllTasks() {
+//        Person person1 = currentUser.isPerson().get();
+//        return tasksService.findByPerson(person1);
+//    }
+    // вызывает Cannot call sendError(). Ушел кушать.
+
+//    @GetMapping("/add")
+//    public String add(@RequestBody Tasks task) {
+//        return "add";
+//    }
 
     @PostMapping("/add")
-    public String addPost(@ModelAttribute("task1") @Valid Tasks task, BindingResult bindingResult) {
+    public ResponseEntity<String> addPost(@RequestBody @Valid TasksDTO task1, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            return "add";
+            return ResponseEntity.ok("Not Created");
         }
-//        if (currentUser.isPerson().isPresent()) {
+        Tasks task =  converter.toTasks(task1);
+
             task.setPerson(currentUser.isPerson().get());
-//        }
+
         tasksService.add(task);
-        return "redirect:/task";
+        return ResponseEntity.ok("Add");
     }
 
     @GetMapping("/{id}")
-    public String watchTask(@PathVariable("id") int id, Model model, HttpSession httpSession) {
-        httpSession.setAttribute("task11", tasksService.watchTask(id));
-        model.addAttribute("task1", tasksService.watchTask(id));
-        return "show";
+    public ResponseEntity<String> watchTask(@PathVariable("id") UUID id) {
+        return ResponseEntity.ok("Получилось\n" + tasksService.returnOne(tasksService.watchTask(id)));
     }
-    @PostMapping("/{id}/edit")
-    public String edit(@PathVariable("id") int id, @ModelAttribute("task1") @Valid Tasks tasks, BindingResult bindingResult,
-                       Model model, HttpSession httpSession) {
-        Tasks tasks1 = (Tasks) httpSession.getAttribute("task11");
-        if (bindingResult.hasErrors()) {
-            model.addAttribute("task1", tasks1);
-            return "show";
-        }
-        tasks1.setTask(tasks.getTask());
-        tasks1.setText(tasks.getText());
-        tasks1.setIsCompleted(tasks.getIsCompleted());
-        tasksService.save(tasks1);
-        return "redirect:/task/{id}";
-    }
+//    @PostMapping("/{id}/edit")
+//    public ResponseEntity<Tasks> edit(@PathVariable("id") int id, @RequestBody @Valid Tasks tasks, BindingResult bindingResult, HttpSession httpSession) {
+//        Tasks tasks1 = (Tasks) httpSession.getAttribute("task11");
+//        if (bindingResult.hasErrors()) {
+//            return ResponseEntity.ok(null);
+//        }
+//        tasks1.setTask(tasks.getTask());
+//        tasks1.setText(tasks.getText());
+//        tasks1.setIsCompleted(tasks.getIsCompleted());
+//        tasksService.save(tasks1);
+//        return ResponseEntity.ok(tasksService.watchTask(id));
+//    }
 
     @GetMapping("/sort/{name}")
-    public String sort(@PathVariable("name") String sortValue, HttpSession httpSession, Model model) {
-        Person person = (Person) httpSession.getAttribute("person");
-        model.addAttribute("tasks", tasksService.findAllSort(sortValue, person));
-        return "task";
+    public ResponseEntity<String> sort(@PathVariable("name") String sortValue) {
+        if (currentUser.isPerson().isPresent()) {
+            Person person1 = currentUser.isPerson().get();
+            List<Tasks> tasks = tasksService.findAllSort(sortValue, person1);
+            return ResponseEntity.ok(tasksService.returnALl(tasks));
+        }
+        return ResponseEntity.ok("Not ok");
     }
 
     @DeleteMapping("/{id}")
-    public String delete(@PathVariable("id") UUID id) {
+    public ResponseEntity<String> delete(@PathVariable("id") UUID id) {
         tasksService.delete(id);
-        return "redirect:/task";
+        return ResponseEntity.ok("Delete");
     }
 }

@@ -39,8 +39,8 @@ public class TasksService {
         tasksRepo.save(tasks);
     }
 
-    public Tasks watchTask(int id) {
-        return tasksRepo.findById(id).orElse(null);
+    public Tasks watchTask(UUID id) {
+        return tasksRepo.findById(id);
     }
 
     public List<Tasks> findAllSort(String sort, Person person) {
@@ -62,5 +62,22 @@ public class TasksService {
     public void delete(UUID id) {
         tasksRepo.deleteById(id);
     }
+
+    public String returnALl(List<Tasks> tasks) {
+        StringBuilder all = new StringBuilder();
+        for (Tasks task : tasks) {
+            all.append("Имя задачи: ").append(task.getTask()).append(" Текст задачи").append(" ").append(task.getText()).append(" ").append(task.getIsCompleted())
+                    .append(" ").append(" Время создания: ").append(task.getDateOfCreation()).append("Дата изменения").append(" ").append(task.getDateOfChange()).append("\n");
+        }
+        return all.toString();
+    }
+
+    public String returnOne(Tasks task) {
+        StringBuilder all = new StringBuilder();
+            all.append("Имя задачи: ").append(task.getTask()).append(" Текст задачи").append(" ").append(task.getText()).append(" ").append(task.getIsCompleted())
+                    .append(" ").append(" Время создания: ").append(task.getDateOfCreation()).append("Дата изменения").append(" ").append(task.getDateOfChange()).append("\n");
+        return all.toString();
+    }
+
 
 }

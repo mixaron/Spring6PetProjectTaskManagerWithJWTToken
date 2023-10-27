@@ -22,4 +22,6 @@ public interface TasksRepo extends JpaRepository<Tasks, Integer> {
     List<Tasks> findAllByPersonOrderByIsCompleted(Person person);
 
     void deleteById(UUID uuid);
+
+    Tasks findById(UUID id);
 }

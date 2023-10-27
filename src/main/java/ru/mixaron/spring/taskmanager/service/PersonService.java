@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import ru.mixaron.spring.taskmanager.models.Person;
 import ru.mixaron.spring.taskmanager.models.Tasks;
 import ru.mixaron.spring.taskmanager.repository.PersonRepo;
+import ru.mixaron.spring.taskmanager.util.Role;
 
 import java.util.Optional;
 
@@ -21,7 +22,7 @@ public class PersonService {
 
     public void save(Person person) {
         String encode = passwordEncoder.encode(person.getPassword());
-        person.setRole("ROLE_USER");
+        person.setRole(Role.USER);
         person.setPassword(encode);
         personRepo.save(person);
     }

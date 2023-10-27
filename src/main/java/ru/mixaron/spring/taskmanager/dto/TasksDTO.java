@@ -17,10 +17,4 @@ public class TasksDTO {
     private String text;
 
     private String isCompleted;
-
-    private Date dateOfCreation;
-
-    private Date dateOfChange;
-
-    private Person person;
 }
