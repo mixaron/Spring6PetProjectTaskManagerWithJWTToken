@@ -1,0 +1,75 @@
+version: '3'
+
+services:
+
+  spring-boot:
+    build: ./
+    environment:
+          - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/postgres
+          - SPRING_DATASOURCE_USERNAME=postgres
+          - SPRING_DATASOURCE_PASSWORD=123123
+          - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    ports:
+      - 8081:8080
+  db:
+    image: postgres
+    restart: always
+    # set shared memory limit when using docker-compose
+    shm_size: 128mb
+    # or set shared memory limit when deploy via swarm stack
+    #volumes:
+    #  - type: tmpfs
+    #    target: /dev/shm
+    #    tmpfs:
+    #      size: 134217728 # 128*2^20 bytes = 128Mb
+    environment:
+      POSTGRES_PASSWORD: 123123
+
+  adminer:
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=your@gmail.com
+      - PGADMIN_DEFAULT_PASSWORD=123123
+    ports:
+      - 8080:80
+#version: '3.9'
+#
+#services:
+#  spring-boot:
+#    image: 'docker-spring-boot-postgres:latest'
+#    build:
+#      context: .
+#    container_name: app
+#    depends_on:
+#      - db
+#    environment:
+#      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/postgresTest
+#      - SPRING_DATASOURCE_USERNAME=postgresTest
+#      - SPRING_DATASOURCE_PASSWORD=123123
+#      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+#    ports:
+#      - 8081:8080
+#
+#
+#  db:
+#    image: postgres
+#    restart: always
+#    shm_size: 128mb
+#    environment:
+#      POSTGRES_DB: postgresTest
+#      POSTGRES_USER: postgresTest
+#      POSTGRES_PASSWORD: 123123
+#
+#    ports:
+#      - "5432:5432"
+#
+#  adminer:
+#    image: dpage/pgadmin4
+#    restart: always
+#    environment:
+#      - PGADMIN_DEFAULT_EMAIL=your@gmail.com
+#      - PGADMIN_DEFAULT_PASSWORD=123123
+#
+#    ports:
+#      - 8080:8080
